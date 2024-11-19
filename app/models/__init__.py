@@ -5,5 +5,5 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # Import models to make them accessible
-from .user import User
-from .persona import Persona
+from .users import User
+from .personas import PersonasBaseData

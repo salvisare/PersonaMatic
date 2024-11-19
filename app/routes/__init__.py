@@ -1,4 +1,8 @@
-from .users import users_bp  # Import the users blueprint
+# In app/routes/__init__.py or app.py
+from flask import Blueprint
 
-# Export the blueprint for app initialization
-__all__ = ['users_bp']
+main_bp = Blueprint('main', __name__)
+
+@main_bp.route('/')
+def index():
+    return "Welcome to the Flask App!", 200

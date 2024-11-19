@@ -1,20 +1,25 @@
 from flask import Flask
-from .config import Config
-from .models import db
-from .users import users_bp
-from .personas import personas_bp
+from flask_sqlalchemy import SQLAlchemy
+from app.routes import main_bp  # Import your blueprint
 
-# Explicitly define what is exposed by this package
-__all__ = ['users_bp', 'personas_bp']
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('config.Config')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Update to your database URI
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
     db.init_app(app)
 
     # Register blueprints
-    app.register_blueprint(users_bp, url_prefix='/api/users')
+    from app.routes.users import users_bp
+    from app.routes.personas import personas_bp
+
+    app.register_blueprint(users_bp, url_prefix='/api')
+    app.register_blueprint(personas_bp, url_prefix='/api')
+
+    with app.app_context():
+        db.create_all()  # Create tables if they don't exist
 
     return app

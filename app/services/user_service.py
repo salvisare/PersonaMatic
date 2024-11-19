@@ -1,4 +1,4 @@
-from ..models.user import User
+from ..models.users import User
 from .. import db
 
 class UserService:
