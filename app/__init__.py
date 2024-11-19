@@ -15,9 +15,11 @@ def create_app():
     # Register blueprints
     from app.routes.users import users_bp
     from app.routes.personas import personas_bp
+    from app.routes.user_uploaded_data import uploads_bp
 
     app.register_blueprint(users_bp, url_prefix='/api')
     app.register_blueprint(personas_bp, url_prefix='/api')
+    app.register_blueprint(uploads_bp, url_prefix='/api')
 
     with app.app_context():
         db.create_all()  # Create tables if they don't exist
