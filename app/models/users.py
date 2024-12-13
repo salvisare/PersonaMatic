@@ -11,3 +11,6 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<User {self.username}, {self.first_name} {self.last_name}, Email: {self.email}>'

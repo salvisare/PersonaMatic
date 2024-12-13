@@ -18,6 +18,7 @@ def create_user():
     db.session.commit()
     return jsonify({"message": "User created successfully", "user": {"id": new_user.id}}), 201
 
+
 @users_bp.route('/users-retrieve', methods=['GET'])
 def retrieve_users():
     users = User.query.all()
@@ -45,7 +46,7 @@ def update_user(id):
     db.session.commit()
     return jsonify({"message": "User updated successfully"})
 
-@users_bp.route('/users-update/<int:id>', methods=['DELETE'])
+@users_bp.route('/users-delete/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get_or_404(id)
     db.session.delete(user)

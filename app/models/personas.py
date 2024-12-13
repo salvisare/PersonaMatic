@@ -18,7 +18,7 @@ class PersonasBaseData(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationship to uploaded data
-    uploaded_files = db.relationship('UserUploadedData', backref='persona', cascade="all, delete-orphan")
+    # uploaded_files = db.relationship('UserUploadedData', backref='persona', cascade="all, delete-orphan")
 
     # Relationships for goals, motivations, etc.
     goals = db.relationship('PersonaGoals', backref='persona', cascade="all, delete-orphan")
