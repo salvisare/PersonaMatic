@@ -1,11 +1,17 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from dotenv import load_dotenv
 import os
 
 # Initialize extensions globally
 db = SQLAlchemy()
 migrate = Migrate()
+
+load_dotenv()
+
+# Retrieve the API key
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def create_app(config_class='config.DevelopmentConfig'):
     """Application factory function."""

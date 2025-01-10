@@ -1,3 +1,4 @@
+import openai
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,6 +11,10 @@ from .user_uploaded_data import UserUploadedData
 # Initialize the SQLAlchemy and Migrate instances
 db = SQLAlchemy()
 migrate = Migrate()
+
+from app import OPENAI_API_KEY
+
+openai.api_key = OPENAI_API_KEY
 
 
 def create_app():
@@ -32,7 +37,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(users_bp, url_prefix='/api/users')
     app.register_blueprint(personas_bp)
-    app.register_blueprint(uploads_bp)
+    app.register_blueprint(uploads_bp, url_prefix='/uploads')
 
     for rule in app.url_map.iter_rules():
         print(f"Endpoint: {rule.endpoint}, Route: {rule}")

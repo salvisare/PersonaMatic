@@ -1,7 +1,14 @@
 from flask import Blueprint, request, jsonify
+from openai import OpenAI
+from pydantic import BaseModel
+
 from app.models.user_uploaded_data import UserUploadedData
-from app import db
+from app.models.personas import PersonasBaseData, PersonasBaseDataAI, PersonaMotivations, PersonaFrustrations, PersonaActivities, PersonaGoals, PersonaDigitalUse, PersonaQuotes
+from app import db, OPENAI_API_KEY
 from datetime import datetime
+import logging
+
+api_key = OPENAI_API_KEY
 
 uploads_bp = Blueprint('uploads', __name__)
 
@@ -48,6 +55,7 @@ def retrieve_uploads():
     ]
     return jsonify(results), 200
 
+
 @uploads_bp.route('/uploads-retrieve/<int:id>', methods=['GET'])
 def retrieve_upload(id):
     upload = UserUploadedData.query.get_or_404(id)
@@ -59,6 +67,7 @@ def retrieve_upload(id):
         'processed': upload.processed
     }), 200
 
+
 @uploads_bp.route('/uploads-delete/<int:id>', methods=['DELETE'])
 def delete_upload(id):
     upload = UserUploadedData.query.get_or_404(id)
@@ -68,3 +77,104 @@ def delete_upload(id):
         return jsonify({'message': 'File deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+@uploads_bp.route('/process-content', methods=['POST'])
+def process_content():
+    logging.info("Received request to process content.")
+
+    record_id = request.json.get('record_id')
+    if not record_id:
+        return jsonify({"error": "Record ID is required"}), 400
+
+    record = UserUploadedData.query.get(record_id)
+    if not record:
+        return jsonify({"error": "Record not found"}), 404
+
+    content = record.content
+
+    try:
+        client = OpenAI(api_key=api_key)
+        # Using openai.Completion.create() for new interface
+        response = client.beta.chat.completions.parse(
+            model="gpt-4o-mini",  # You can use gpt-4 or gpt-4o-mini if it's available
+            messages=[
+                {"role": "system", "content": "You are a UX researcher and usability specialist."},
+                {"role": "user", "content": f"Analyze the following content and extract:\n"
+                                            f"- Name, Age, Occupation, Description\n"
+                                            f"- Top 3 Motivations\n"
+                                            f"- Top 3 Frustrations\n"
+                                            f"- Top 5 Activities\n"
+                                            f"- Top 3 Goals (personal and professional):\n\n"
+                                            f"{content}"}
+            ],
+            max_tokens=1000,
+            response_format=PersonasBaseDataAI
+        )
+
+        # Extract the generated content from the response
+        # processed_data = response['choices'][0]['message']['content'].strip()
+        processed_data = response.choices[0].message.parsed
+
+        # Assuming OpenAI returns a structured JSON-like string
+        # try:
+        #     processed_json = eval(processed_data)  # Use `eval` cautiously or replace with `json.loads` if JSON
+        # except Exception as e:
+        #     return jsonify({"error": f"Failed to parse OpenAI response: {str(e)}"}), 500
+
+        # Extract data from the processed JSON
+        # name = processed_json.get('name')
+        # age = processed_json.get('age')
+        # occupation = processed_json.get('occupation')
+        # description = processed_json.get('description')
+        #
+        # motivations = processed_json.get('motivations', [])
+        # frustrations = processed_json.get('frustrations', [])
+        # activities = processed_json.get('activities', [])
+        # goals = processed_json.get('goals', [])
+
+        # Insert into personas_base_data
+        # persona = PersonasBaseData(
+        #     user_id=record.user_id,
+        #     name=name,
+        #     age=age,
+        #     occupation=occupation,
+        #     description=description
+        # )
+        # db.session.add(persona)
+        # db.session.commit()  # Commit to get persona ID
+        #
+        # # Insert into related tables
+        # if motivations:
+        #     for motivation in motivations:
+        #         db.session.add(PersonaMotivations(persona_id=persona.id, motivation_01=motivation))
+        # if frustrations:
+        #     for frustration in frustrations:
+        #         db.session.add(PersonaFrustrations(persona_id=persona.id, frustration_01=frustration))
+        # if activities:
+        #     for activity in activities[:5]:  # Limit to top 5
+        #         db.session.add(PersonaActivities(persona_id=persona.id, activity_01=activity))
+        # if goals:
+        #     for goal in goals[:3]:  # Limit to top 3
+        #         db.session.add(PersonaGoals(persona_id=persona.id, goal_01=goal))
+
+    #     db.session.commit()
+    #
+    #     # Mark record as processed
+    #     record.processed = True
+    #     db.session.commit()
+    #
+        #print(processed_data["motivations"])
+        return jsonify({
+            "record_id": record_id,
+            # "persona_id": persona.id,
+            # "message": processed_data,
+            "goals": processed_data.goals,
+            "motivations": processed_data.motivations,
+            "frustrations": processed_data.frustrations,
+            "activities": processed_data.activities
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
