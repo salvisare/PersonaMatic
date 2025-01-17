@@ -83,11 +83,11 @@ def delete_upload(id):
 def process_content():
     logging.info("Received request to process content.")
 
-    record_id = request.json.get('record_id')
-    if not record_id:
-        return jsonify({"error": "Record ID is required"}), 400
+    upload_id = request.json.get('id')
+    if not upload_id:
+        return jsonify({"error": "ID is required"}), 400
 
-    record = UserUploadedData.query.get(record_id)
+    record = UserUploadedData.query.get(upload_id)
     if not record:
         return jsonify({"error": "Record not found"}), 404
 
@@ -97,9 +97,9 @@ def process_content():
         client = OpenAI(api_key=api_key)
         # Using openai.Completion.create() for new interface
         response = client.beta.chat.completions.parse(
-            model="gpt-4o-mini",  # You can use gpt-4 or gpt-4o-mini if it's available
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a UX researcher and usability specialist."},
+                {"role": "system", "content": "You are a UX researcher, user interviewer and content conceptualisation and interview analysis specialist."},    # now the role is developer instead system
                 {"role": "user", "content": f"Analyze the following content and extract:\n"
                                             f"- Name, Age, Occupation, Description\n"
                                             f"- Top 3 Motivations\n"
@@ -108,7 +108,7 @@ def process_content():
                                             f"- Top 3 Goals (personal and professional):\n\n"
                                             f"{content}"}
             ],
-            max_tokens=1000,
+            max_tokens=1000,    # restricting the model; now the tokens is max_completion_tokens 'check' instead max_tokens
             response_format=PersonasBaseDataAI
         )
 
@@ -166,9 +166,13 @@ def process_content():
     #
         #print(processed_data["motivations"])
         return jsonify({
-            "record_id": record_id,
+            "upload_id": upload_id,
             # "persona_id": persona.id,
             # "message": processed_data,
+            "name": processed_data.name,
+            "age": processed_data.age,
+            "occupation": processed_data.occupation,
+            "description": processed_data.description,
             "goals": processed_data.goals,
             "motivations": processed_data.motivations,
             "frustrations": processed_data.frustrations,

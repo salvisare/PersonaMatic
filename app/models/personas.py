@@ -29,12 +29,13 @@ class PersonasBaseData(db.Model):
 
 
 class PersonasBaseDataAI(BaseModel):
-    # name: str
+    name: str
     # additional_title: str
     # description: str
-    # age: int
+    age: int
     # gender: str
-    # occupation: str
+    occupation: str
+    description: str
     # quote_summarized: str
     goals: list[str]
     motivations: list[str]

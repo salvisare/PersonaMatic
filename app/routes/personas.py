@@ -5,7 +5,7 @@ from app import db
 
 personas_bp = Blueprint('personas', __name__)
 
-@personas_bp.route('/api/personas-create', methods=['POST'])
+@personas_bp.route('/personas-create', methods=['POST'])
 def create_persona():
     data = request.json
     try:
@@ -26,7 +26,7 @@ def create_persona():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@personas_bp.route('/api/personas-retrieve', methods=['GET'])
+@personas_bp.route('/personas-retrieve', methods=['GET'])
 def retrieve_personas():
     personas = PersonasBaseData.query.all()
     results = [
@@ -44,7 +44,7 @@ def retrieve_personas():
     ]
     return jsonify(results), 200
 
-@personas_bp.route('/api/personas-retrieve/<int:id>', methods=['GET'])
+@personas_bp.route('/personas-retrieve/<int:id>', methods=['GET'])
 def retrieve_persona(id):
     # Retrieve persona by ID
     persona = PersonasBaseData.query.get_or_404(id)
@@ -74,7 +74,7 @@ def retrieve_persona(id):
         ]
     }), 200
 
-@personas_bp.route('/api/personas-update/<int:id>', methods=['PUT'])
+@personas_bp.route('/personas-update/<int:id>', methods=['PUT'])
 def update_persona(id):
     data = request.json
     persona = PersonasBaseData.query.get_or_404(id)
@@ -91,7 +91,7 @@ def update_persona(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@personas_bp.route('/api/personas-delete/<int:id>', methods=['DELETE'])
+@personas_bp.route('/personas-delete/<int:id>', methods=['DELETE'])
 def delete_persona(id):
     persona = PersonasBaseData.query.get_or_404(id)
     try:
