@@ -33,10 +33,10 @@ class PersonasBaseDataAI(BaseModel):
     # additional_title: str
     # description: str
     age: int
-    # gender: str
+    gender: str
     occupation: str
     description: str
-    # quote_summarized: str
+    quote_summarized: str
     goals: list[str]
     motivations: list[str]
     frustrations: list[str]

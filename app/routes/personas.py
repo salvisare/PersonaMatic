@@ -5,6 +5,7 @@ from app import db
 
 personas_bp = Blueprint('personas', __name__)
 
+
 @personas_bp.route('/personas-create', methods=['POST'])
 def create_persona():
     data = request.json

@@ -1,12 +1,15 @@
 from flask import Blueprint, request, jsonify
 from openai import OpenAI
-from pydantic import BaseModel
-
 from app.models.user_uploaded_data import UserUploadedData
-from app.models.personas import PersonasBaseData, PersonasBaseDataAI, PersonaMotivations, PersonaFrustrations, PersonaActivities, PersonaGoals, PersonaDigitalUse, PersonaQuotes
+from app.models.personas import (
+    PersonasBaseData, PersonasBaseDataAI, PersonaMotivations, PersonaFrustrations,
+    PersonaActivities, PersonaGoals, PersonaDigitalUse, PersonaQuotes
+)
 from app import db, OPENAI_API_KEY
 from datetime import datetime
 import logging
+import json
+import re
 
 api_key = OPENAI_API_KEY
 
@@ -16,16 +19,15 @@ uploads_bp = Blueprint('uploads', __name__)
 def upload_file():
     data = request.json
     try:
-        # Assuming the file name is part of the data
-        file_name = data.get('file_name')  # Ensure this is passed in the JSON
+        file_name = data.get('file_name')
         if not file_name:
             return jsonify({"error": "File name is required"}), 400
 
         upload = UserUploadedData(
             user_id=data['user_id'],
-            file_name=file_name,  # Ensure file_name is provided
-            file_path=data.get('file_path'),  # Optional if provided
-            file_type=data.get('file_type'),  # Optional if provided
+            file_name=file_name,
+            file_path=data.get('file_path'),
+            file_type=data.get('file_type'),
             content=data['content'],
             uploaded_at=datetime.utcnow(),
             processed=data.get('processed', False)
@@ -37,10 +39,11 @@ def upload_file():
         return jsonify({'message': 'File uploaded successfully', 'id': upload.id}), 201
 
     except Exception as e:
+        logging.error(f"Error uploading file: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 
-@uploads_bp.route('/uploads-retrieve', methods=['GET']) #!!! update endpoint !!!
+@uploads_bp.route('/uploads-retrieve', methods=['GET'])
 def retrieve_uploads():
     uploads = UserUploadedData.query.all()
     results = [
@@ -76,6 +79,7 @@ def delete_upload(id):
         db.session.commit()
         return jsonify({'message': 'File deleted successfully'}), 200
     except Exception as e:
+        logging.error(f"Error deleting file: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 
@@ -92,93 +96,151 @@ def process_content():
         return jsonify({"error": "Record not found"}), 404
 
     content = record.content
+    logging.info(f"Content being processed: {content}")
 
     try:
         client = OpenAI(api_key=api_key)
-        # Using openai.Completion.create() for new interface
         response = client.beta.chat.completions.parse(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a UX researcher, user interviewer and content conceptualisation and interview analysis specialist."},    # now the role is developer instead system
-                {"role": "user", "content": f"Analyze the following content and extract:\n"
-                                            f"- Name, Age, Occupation, Description\n"
-                                            f"- Top 3 Motivations\n"
-                                            f"- Top 3 Frustrations\n"
-                                            f"- Top 5 Activities\n"
-                                            f"- Top 3 Goals (personal and professional):\n\n"
-                                            f"{content}"}
+                {"role": "system", "content": "You are a UX researcher, user interviewer, and content analysis specialist."},
+                {"role": "user", "content": f"Analyze the following content and return a structured JSON object with these keys:\n"
+                                            f"- name (if no name is provided in the content, use a random name and surname, avoing surnames Smith and Doe)\n"
+                                            f"- age\n"
+                                            f"- gender (if no gener id given, sync the gender according to the generated name)\n"
+                                            f"- quote (extract a prominent quote from the content given, be descriptive and use only one sentence)\n"
+                                            f"- occupation\n"
+                                            f"- description\n"
+                                            f"- goals (list of 3)\n"
+                                            f"- motivations (list of 3)\n"
+                                            f"- frustrations (list of 3)\n"
+                                            f"- activities (list of 5, if no activities are mentioned, generate relevant activities based on the context)\n\n"
+                                            f"Input Content:\n\n{content}\n\n"
+                                            f"Output ONLY valid JSON. Do not include any additional text, explanations, or commentary."}
             ],
-            max_tokens=1000,    # restricting the model; now the tokens is max_completion_tokens 'check' instead max_tokens
-            response_format=PersonasBaseDataAI
+            max_tokens=1000,
         )
 
-        # Extract the generated content from the response
-        # processed_data = response['choices'][0]['message']['content'].strip()
-        processed_data = response.choices[0].message.parsed
+        response_content = response.choices[0].message.content
+        logging.info(f"Raw OpenAI Response Content: {response_content}")
 
-        # Assuming OpenAI returns a structured JSON-like string
-        # try:
-        #     processed_json = eval(processed_data)  # Use `eval` cautiously or replace with `json.loads` if JSON
-        # except Exception as e:
-        #     return jsonify({"error": f"Failed to parse OpenAI response: {str(e)}"}), 500
+        # Attempt to parse JSON response
+        try:
+            processed_data = json.loads(response_content)
+        except json.JSONDecodeError:
+            logging.warning("Response is not JSON. Attempting manual extraction.")
+            match = re.search(r"{.*}", response_content, re.DOTALL)
+            if match:
+                try:
+                    processed_data = json.loads(match.group(0))
+                except json.JSONDecodeError:
+                    processed_data = {}
+            else:
+                processed_data = {}
 
-        # Extract data from the processed JSON
-        # name = processed_json.get('name')
-        # age = processed_json.get('age')
-        # occupation = processed_json.get('occupation')
-        # description = processed_json.get('description')
-        #
-        # motivations = processed_json.get('motivations', [])
-        # frustrations = processed_json.get('frustrations', [])
-        # activities = processed_json.get('activities', [])
-        # goals = processed_json.get('goals', [])
+        # Fallback to defaults if parsing fails
+        if not processed_data:
+            processed_data = {
+                "name": "Unknown",
+                "age": 0,
+                "gender": "No Gender",
+                "description": "No Description",
+                "occupation": "Unknown",
+                "quote": "Unknown",
+                "goals": ["General goal 1", "General goal 2", "General goal 3"],
+                "motivations": ["General motivation 1", "General motivation 2", "General motivation 3"],
+                "frustrations": ["General frustration 1", "General frustration 2", "General frustration 3"],
+                "activities": ["General activity 1", "General activity 2", "General activity 3", "General activity 4", "General activity 5"]
+            }
 
-        # Insert into personas_base_data
-        # persona = PersonasBaseData(
-        #     user_id=record.user_id,
-        #     name=name,
-        #     age=age,
-        #     occupation=occupation,
-        #     description=description
-        # )
-        # db.session.add(persona)
-        # db.session.commit()  # Commit to get persona ID
-        #
-        # # Insert into related tables
-        # if motivations:
-        #     for motivation in motivations:
-        #         db.session.add(PersonaMotivations(persona_id=persona.id, motivation_01=motivation))
-        # if frustrations:
-        #     for frustration in frustrations:
-        #         db.session.add(PersonaFrustrations(persona_id=persona.id, frustration_01=frustration))
-        # if activities:
-        #     for activity in activities[:5]:  # Limit to top 5
-        #         db.session.add(PersonaActivities(persona_id=persona.id, activity_01=activity))
-        # if goals:
-        #     for goal in goals[:3]:  # Limit to top 3
-        #         db.session.add(PersonaGoals(persona_id=persona.id, goal_01=goal))
+        # Extract data
+        name = processed_data.get("name", "Unknown")
+        age = processed_data.get("age", 0)
+        gender = processed_data.get("gender", "Unknown")
+        description = processed_data.get("description", "No Description")
+        occupation = processed_data.get("occupation", "Unknown")
+        quote = processed_data.get("quote", "Unknown")
+        goals = processed_data.get("goals", [])
+        motivations = processed_data.get("motivations", [])
+        frustrations = processed_data.get("frustrations", [])
+        activities = processed_data.get("activities", [])
 
-    #     db.session.commit()
-    #
-    #     # Mark record as processed
-    #     record.processed = True
-    #     db.session.commit()
-    #
-        #print(processed_data["motivations"])
+        # Create persona object
+        persona = PersonasBaseData(
+            user_id=record.user_id,
+            photo="default.jpg",
+            name=name,
+            additional_title="Default Title",
+            description=description,
+            age=age,
+            gender=gender,
+            occupation=occupation,
+            quote_summarized=quote
+        )
+        db.session.add(persona)
+        db.session.commit()
+
+        # Save goals
+        db.session.add(PersonaGoals(
+            persona_id=persona.id,
+            goal_01=goals[0] if len(goals) > 0 else None,
+            goal_02=goals[1] if len(goals) > 1 else None,
+            goal_03=goals[2] if len(goals) > 2 else None,
+        ))
+
+        # Save motivations
+        db.session.add(PersonaMotivations(
+            persona_id=persona.id,
+            motivation_01=motivations[0] if len(motivations) > 0 else None,
+            motivation_02=motivations[1] if len(motivations) > 1 else None,
+            motivation_03=motivations[2] if len(motivations) > 2 else None,
+        ))
+
+        # Save frustrations
+        db.session.add(PersonaFrustrations(
+            persona_id=persona.id,
+            frustration_01=frustrations[0] if len(frustrations) > 0 else None,
+            frustration_02=frustrations[1] if len(frustrations) > 1 else None,
+            frustration_03=frustrations[2] if len(frustrations) > 2 else None,
+        ))
+
+        # Save activities
+        db.session.add(PersonaActivities(
+            persona_id=persona.id,
+            activity_01=activities[0] if len(activities) > 0 else "No activity provided",
+            activity_02=activities[1] if len(activities) > 1 else None,
+            activity_03=activities[2] if len(activities) > 2 else None,
+            activity_04=activities[3] if len(activities) > 3 else None,
+            activity_05=activities[4] if len(activities) > 4 else None
+        ))
+
+        db.session.commit()
+
+        # Mark record as processed
+        record.processed = True
+        db.session.commit()
+
         return jsonify({
             "upload_id": upload_id,
-            # "persona_id": persona.id,
-            # "message": processed_data,
-            "name": processed_data.name,
-            "age": processed_data.age,
-            "occupation": processed_data.occupation,
-            "description": processed_data.description,
-            "goals": processed_data.goals,
-            "motivations": processed_data.motivations,
-            "frustrations": processed_data.frustrations,
-            "activities": processed_data.activities
+            "persona_id": persona.id,
+            "message": "Data processed and saved successfully",
+            "processed_data": {
+                "name": name,
+                "age": age,
+                "gender": gender,
+                "occupation": occupation,
+                "quote": quote,
+                "description": description,
+                "goals": goals,
+                "motivations": motivations,
+                "frustrations": frustrations,
+                "activities": activities
+            }
         })
 
     except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error processing content: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
