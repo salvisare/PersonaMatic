@@ -104,17 +104,24 @@ def process_content():
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a UX researcher, user interviewer, and content analysis specialist."},
-                {"role": "user", "content": f"Analyze the following content and return a structured JSON object with these keys:\n"
+                {"role": "user", "content": f"Analyze the following content for the use of user persona and return a structured JSON object with these keys:\n"
                                             f"- name (if no name is provided in the content, use a random name and surname, avoing surnames Smith and Doe)\n"
+                                            f"- additional title (use a partial occupation and partially emotional adjective depending on the content given)\n"
                                             f"- age\n"
-                                            f"- gender (if no gener id given, sync the gender according to the generated name)\n"
-                                            f"- quote (extract a prominent quote from the content given, be descriptive and use only one sentence)\n"
+                                            f"- gender (if no gender is given, provide the gender according to the generated name)\n"
+                                            f"- prominent quote (extract a prominent quote from the content given, be descriptive and use only one sentence)\n"
                                             f"- occupation\n"
-                                            f"- description\n"
-                                            f"- goals (list of 3)\n"
-                                            f"- motivations (list of 3)\n"
-                                            f"- frustrations (list of 3)\n"
-                                            f"- activities (list of 5, if no activities are mentioned, generate relevant activities based on the context)\n\n"
+                                            f"- description (generate a user persona description)\n"
+                                            f"- goals (list of 3, if no goals are mentioned, generate goals according to the occupation and activities)\n"
+                                            f"- motivations (list of 3, if no motivations are mentioned, generate motivations according to the occupation and description)\n"
+                                            f"- frustrations (list of 3, if no frustrations are mentioned, generate typical frustrations for the relevant occupation)\n"
+                                            f"- activities (list of 5, if no activities are mentioned, generate relevant activities based on the context or occupation)\n\n"
+                                            f"- desktop use (output 'not known' if nothing is mentioned about desktop use)\n"
+                                            f"- mobile use (output 'not known' if nothing is mentioned about mobile use)\n"
+                                            f"- social media use (output 'not known' if nothing is mentioned about social media use)\n"
+                                            f"- computer literacy (output 'not known' if nothing is mentioned about computer literacy)\n"
+                                            f"- frequently used digital tools and apps (output 'not known' if nothing is mentioned about frequently used digital tools and apps)\n"
+                                            f"- interesting quotes (list of 3; extract additional interesting quotes from the content provided)\n"
                                             f"Input Content:\n\n{content}\n\n"
                                             f"Output ONLY valid JSON. Do not include any additional text, explanations, or commentary."}
             ],
@@ -142,35 +149,49 @@ def process_content():
         if not processed_data:
             processed_data = {
                 "name": "Unknown",
+                "additional title": "Unknown",
                 "age": 0,
                 "gender": "No Gender",
                 "description": "No Description",
                 "occupation": "Unknown",
-                "quote": "Unknown",
+                "prominent quote": "Unknown",
                 "goals": ["General goal 1", "General goal 2", "General goal 3"],
                 "motivations": ["General motivation 1", "General motivation 2", "General motivation 3"],
                 "frustrations": ["General frustration 1", "General frustration 2", "General frustration 3"],
-                "activities": ["General activity 1", "General activity 2", "General activity 3", "General activity 4", "General activity 5"]
+                "activities": ["General activity 1", "General activity 2", "General activity 3", "General activity 4", "General activity 5"],
+                "interesting quotes": ["Interesting quote 1", "Interesting quote 2", "Interesting quote 3"],
+                "desktop use": "Unknown",
+                "mobile use": "Unknown",
+                "social media use": "Unknown",
+                "computer literacy": "Unknown",
+                "frequently used digital tools and apps": "Unknown",
             }
 
         # Extract data
         name = processed_data.get("name", "Unknown")
+        additional_title = processed_data.get("additional title", "Unknown")
         age = processed_data.get("age", 0)
         gender = processed_data.get("gender", "Unknown")
         description = processed_data.get("description", "No Description")
         occupation = processed_data.get("occupation", "Unknown")
-        quote = processed_data.get("quote", "Unknown")
+        quote = processed_data.get("prominent quote", "Unknown")
         goals = processed_data.get("goals", [])
         motivations = processed_data.get("motivations", [])
         frustrations = processed_data.get("frustrations", [])
         activities = processed_data.get("activities", [])
+        quotes = processed_data.get("interesting quotes", [])
+        desktop_use = processed_data.get("desktop use", "Unknown")
+        mobile_use = processed_data.get("mobile use", "Unknown")
+        social_media_use = processed_data.get("social media use", "Unknown")
+        computer_literacy = processed_data.get("computer literacy", "Unknown")
+        frequently_used_tools_and_apps = processed_data.get("frequently used digital tools and apps", "Unknown")
 
         # Create persona object
         persona = PersonasBaseData(
             user_id=record.user_id,
             photo="default.jpg",
             name=name,
-            additional_title="Default Title",
+            additional_title=additional_title,
             description=description,
             age=age,
             gender=gender,
@@ -179,6 +200,16 @@ def process_content():
         )
         db.session.add(persona)
         db.session.commit()
+
+        # Save digital use
+        db.session.add(PersonaDigitalUse(
+            persona_id=persona.id,
+            desktop_use=desktop_use,
+            mobile_use=mobile_use,
+            social_media_use=social_media_use,
+            computer_literacy=computer_literacy,
+            frequently_used_tools_and_apps=frequently_used_tools_and_apps,
+        ))
 
         # Save goals
         db.session.add(PersonaGoals(
@@ -214,6 +245,14 @@ def process_content():
             activity_05=activities[4] if len(activities) > 4 else None
         ))
 
+        # Save frustrations
+        db.session.add(PersonaQuotes(
+            persona_id=persona.id,
+            quote_01=quotes[0] if len(quotes) > 0 else None,
+            quote_02=quotes[1] if len(quotes) > 1 else None,
+            quote_03=quotes[2] if len(quotes) > 2 else None,
+        ))
+
         db.session.commit()
 
         # Mark record as processed
@@ -226,15 +265,22 @@ def process_content():
             "message": "Data processed and saved successfully",
             "processed_data": {
                 "name": name,
+                "additional title": additional_title,
                 "age": age,
                 "gender": gender,
                 "occupation": occupation,
-                "quote": quote,
+                "prominent quote": quote,
                 "description": description,
                 "goals": goals,
                 "motivations": motivations,
                 "frustrations": frustrations,
-                "activities": activities
+                "activities": activities,
+                "interesting quotes": quotes,
+                "desktop use": desktop_use,
+                "mobile use": mobile_use,
+                "social media use": social_media_use,
+                "computer literacy": computer_literacy,
+                "frequently used digital tools and apps": frequently_used_tools_and_apps,
             }
         })
 

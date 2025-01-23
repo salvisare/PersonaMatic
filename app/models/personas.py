@@ -30,8 +30,7 @@ class PersonasBaseData(db.Model):
 
 class PersonasBaseDataAI(BaseModel):
     name: str
-    # additional_title: str
-    # description: str
+    additional_title: str
     age: int
     gender: str
     occupation: str
@@ -41,6 +40,11 @@ class PersonasBaseDataAI(BaseModel):
     motivations: list[str]
     frustrations: list[str]
     activities: list[str]
+    desktop_use: str
+    mobile_use: str
+    social_media_use: str
+    computer_literacy: str
+    frequently_used_tools_and_apps: str
 
 
 class PersonaGoals(db.Model):
@@ -98,10 +102,10 @@ class PersonaDigitalUse(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     persona_id = db.Column(db.Integer, db.ForeignKey('personas_base_data.id'), nullable=False)
-    desktop_use = db.Column(db.Boolean, nullable=False, default=False)  # True/False for use
-    mobile_use = db.Column(db.Boolean, nullable=False, default=False)
-    social_media_use = db.Column(db.Boolean, nullable=False, default=False)
-    computer_literacy = db.Column(db.Boolean, nullable=False, default=False)
+    desktop_use = db.Column(db.Text, nullable=False, default=False)  # True/False for use
+    mobile_use = db.Column(db.Text, nullable=False, default=False)
+    social_media_use = db.Column(db.Text, nullable=False, default=False)
+    computer_literacy = db.Column(db.Text, nullable=False, default=False)
     frequently_used_tools_and_apps = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
