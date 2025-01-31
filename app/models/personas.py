@@ -26,6 +26,9 @@ class PersonasBaseData(db.Model):
     goals = db.relationship('PersonaGoals', backref='persona', cascade="all, delete-orphan")
     motivations = db.relationship('PersonaMotivations', backref='persona', cascade="all, delete-orphan")
     frustrations = db.relationship('PersonaFrustrations', backref='persona', cascade="all, delete-orphan")
+    activities = db.relationship('PersonaActivities', backref='persona', cascade="all, delete-orphan")
+    digital_use = db.relationship('PersonaDigitalUse', backref='persona', cascade="all, delete-orphan")
+    persona_quotes = db.relationship('PersonaQuotes', backref='persona', cascade="all, delete-orphan")
 
 
 class PersonasBaseDataAI(BaseModel):
@@ -40,6 +43,7 @@ class PersonasBaseDataAI(BaseModel):
     motivations: list[str]
     frustrations: list[str]
     activities: list[str]
+    persona_quotes: list[str]
     desktop_use: str
     mobile_use: str
     social_media_use: str
@@ -102,11 +106,11 @@ class PersonaDigitalUse(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     persona_id = db.Column(db.Integer, db.ForeignKey('personas_base_data.id'), nullable=False)
-    desktop_use = db.Column(db.Text, nullable=False, default=False)  # True/False for use
-    mobile_use = db.Column(db.Text, nullable=False, default=False)
-    social_media_use = db.Column(db.Text, nullable=False, default=False)
-    computer_literacy = db.Column(db.Text, nullable=False, default=False)
-    frequently_used_tools_and_apps = db.Column(db.Text, nullable=True)
+    desktop_use = db.Column(db.Text, nullable=False, default="Not known")
+    mobile_use = db.Column(db.Text, nullable=False, default="Not known")
+    social_media_use = db.Column(db.Text, nullable=False, default="Not known")
+    computer_literacy = db.Column(db.Text, nullable=False, default="Not known")
+    frequently_used_tools_and_apps = db.Column(db.Text, nullable="Not known")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

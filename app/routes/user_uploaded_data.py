@@ -109,26 +109,28 @@ def process_content():
                                             f"- additional title (use a partial occupation and partially emotional adjective depending on the content given)\n"
                                             f"- age\n"
                                             f"- gender (if no gender is given, provide the gender according to the generated name)\n"
-                                            f"- prominent quote (extract a prominent quote from the content given, be descriptive and use only one sentence)\n"
+                                            f"- summarized quote (a single sentence, mandatory, extract a prominent persona quote from the content given, be descriptive and use only one sentence)\n"
                                             f"- occupation\n"
                                             f"- description (generate a user persona description)\n"
                                             f"- goals (list of 3, if no goals are mentioned, generate goals according to the occupation and activities)\n"
                                             f"- motivations (list of 3, if no motivations are mentioned, generate motivations according to the occupation and description)\n"
                                             f"- frustrations (list of 3, if no frustrations are mentioned, generate typical frustrations for the relevant occupation)\n"
                                             f"- activities (list of 5, if no activities are mentioned, generate relevant activities based on the context or occupation)\n\n"
+                                            f"- persona quotes (extract a list of 3 additional interesting persona quotes from the content provided, don't repeat the prominent quote)\n"
                                             f"- desktop use (output 'not known' if nothing is mentioned about desktop use)\n"
                                             f"- mobile use (output 'not known' if nothing is mentioned about mobile use)\n"
                                             f"- social media use (output 'not known' if nothing is mentioned about social media use)\n"
                                             f"- computer literacy (output 'not known' if nothing is mentioned about computer literacy)\n"
                                             f"- frequently used digital tools and apps (output 'not known' if nothing is mentioned about frequently used digital tools and apps)\n"
-                                            f"- interesting quotes (list of 3; extract additional interesting quotes from the content provided)\n"
                                             f"Input Content:\n\n{content}\n\n"
-                                            f"Output ONLY valid JSON. Do not include any additional text, explanations, or commentary."}
+                                            f"Output ONLY valid JSON format. Do not include any additional text, explanations, or commentary."}
             ],
             max_tokens=1000,
+            response_format=PersonasBaseDataAI
         )
 
         response_content = response.choices[0].message.content
+        print(response_content)
         logging.info(f"Raw OpenAI Response Content: {response_content}")
 
         # Attempt to parse JSON response
@@ -154,12 +156,12 @@ def process_content():
                 "gender": "No Gender",
                 "description": "No Description",
                 "occupation": "Unknown",
-                "prominent quote": "Unknown",
+                "quote_summarized": "Unknown",
                 "goals": ["General goal 1", "General goal 2", "General goal 3"],
                 "motivations": ["General motivation 1", "General motivation 2", "General motivation 3"],
                 "frustrations": ["General frustration 1", "General frustration 2", "General frustration 3"],
                 "activities": ["General activity 1", "General activity 2", "General activity 3", "General activity 4", "General activity 5"],
-                "interesting quotes": ["Interesting quote 1", "Interesting quote 2", "Interesting quote 3"],
+                "persona quotes": ["Persona quote 1", "Persona quote 2", "Persona quote 3"],
                 "desktop use": "Unknown",
                 "mobile use": "Unknown",
                 "social media use": "Unknown",
@@ -174,17 +176,17 @@ def process_content():
         gender = processed_data.get("gender", "Unknown")
         description = processed_data.get("description", "No Description")
         occupation = processed_data.get("occupation", "Unknown")
-        quote = processed_data.get("prominent quote", "Unknown")
+        quote_summarized = processed_data.get("quote_summarized", "Unknown")
         goals = processed_data.get("goals", [])
         motivations = processed_data.get("motivations", [])
         frustrations = processed_data.get("frustrations", [])
         activities = processed_data.get("activities", [])
-        quotes = processed_data.get("interesting quotes", [])
-        desktop_use = processed_data.get("desktop use", "Unknown")
-        mobile_use = processed_data.get("mobile use", "Unknown")
-        social_media_use = processed_data.get("social media use", "Unknown")
-        computer_literacy = processed_data.get("computer literacy", "Unknown")
-        frequently_used_tools_and_apps = processed_data.get("frequently used digital tools and apps", "Unknown")
+        persona_quotes = processed_data.get("persona_quotes", [])
+        desktop_use = processed_data.get("desktop_use", "Unknown")
+        mobile_use = processed_data.get("mobile_use", "Unknown")
+        social_media_use = processed_data.get("social_media_use", "Unknown")
+        computer_literacy = processed_data.get("computer_literacy", "Unknown")
+        frequently_used_tools_and_apps = processed_data.get("frequently_used_digital_tools_and_apps", "Unknown")
 
         # Create persona object
         persona = PersonasBaseData(
@@ -196,7 +198,7 @@ def process_content():
             age=age,
             gender=gender,
             occupation=occupation,
-            quote_summarized=quote
+            quote_summarized=quote_summarized
         )
         db.session.add(persona)
         db.session.commit()
@@ -248,9 +250,9 @@ def process_content():
         # Save frustrations
         db.session.add(PersonaQuotes(
             persona_id=persona.id,
-            quote_01=quotes[0] if len(quotes) > 0 else None,
-            quote_02=quotes[1] if len(quotes) > 1 else None,
-            quote_03=quotes[2] if len(quotes) > 2 else None,
+            quote_01=persona_quotes[0] if len(persona_quotes) > 0 else None,
+            quote_02=persona_quotes[1] if len(persona_quotes) > 1 else None,
+            quote_03=persona_quotes[2] if len(persona_quotes) > 2 else None,
         ))
 
         db.session.commit()
@@ -269,13 +271,13 @@ def process_content():
                 "age": age,
                 "gender": gender,
                 "occupation": occupation,
-                "prominent quote": quote,
+                "quote summarized": quote_summarized,
                 "description": description,
                 "goals": goals,
                 "motivations": motivations,
                 "frustrations": frustrations,
                 "activities": activities,
-                "interesting quotes": quotes,
+                "persona quotes": persona_quotes,
                 "desktop use": desktop_use,
                 "mobile use": mobile_use,
                 "social media use": social_media_use,

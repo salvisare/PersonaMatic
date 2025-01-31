@@ -51,11 +51,14 @@ Ensure you have the following installed:
 6. **View in Browser**
    Open http://127.0.0.1:5000 in your web browser.
 
-## File Structure
+## Concept
+![Concept](app/static/img/db_schema.png)
 
-## Usage
+## DB Diagram
+![DB Diagram](app/static/img/db_schema.png)
 
 ## Screenshots
+* tbc
 
 ## Tech Stack
 * Backend: Flask (Python)
@@ -69,9 +72,6 @@ Ensure you have the following installed:
 3. Commit your changes (git commit -am 'Add new feature').
 4. Push to the branch (git push origin feature-branch).
 5. Open a Pull Request.
-
-## License
-?
 
 ## Acknowledgments
 * OpenAI API Documentation (https://platform.openai.com/docs/overview)
