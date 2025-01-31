@@ -54,7 +54,7 @@ Ensure you have the following installed:
 ---
 
 ## Concept
-![Concept](app/static/img/db_schema.png)
+![Concept](app/static/img/PersonaMatic concept.png)
 
 ---
 
