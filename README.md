@@ -51,14 +51,22 @@ Ensure you have the following installed:
 6. **View in Browser**
    Open http://127.0.0.1:5000 in your web browser.
 
+---
+
 ## Concept
 ![Concept](app/static/img/db_schema.png)
+
+---
 
 ## DB Diagram
 ![DB Diagram](app/static/img/db_schema.png)
 
+---
+
 ## Screenshots
 * tbc
+
+---
 
 ## Tech Stack
 * Backend: Flask (Python)
@@ -66,12 +74,16 @@ Ensure you have the following installed:
 * Front-End Framework: Bootstrap 5
 * Environment Management: Python venv and .env files
 
+---
+
 ## Contributing
 1. Fork the repository.
 2. Create a feature branch (git checkout -b feature-branch).
 3. Commit your changes (git commit -am 'Add new feature').
 4. Push to the branch (git push origin feature-branch).
 5. Open a Pull Request.
+
+---
 
 ## Acknowledgments
 * OpenAI API Documentation (https://platform.openai.com/docs/overview)
