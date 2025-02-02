@@ -4,6 +4,7 @@
     <title>Success - PersonaMatic - Automated User Persona Generation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -24,15 +25,46 @@
     </nav>
 
     <!-- Success Message -->
-    <div class="container text-center mt-5">
-        <h2>Registration Successful!</h2>
-        <p class="lead">Thank you for signing up. Start generating your first user persona below.</p>
+    <div class="container text-center mt-5 mb-5">
+        <h2 class="fancy-heading">🎉 Welcome to PersonaMatic!</h2>
+        <p class="lead">Let's create your first user persona in just three simple steps.</p>
+    </div>
+
+    <!-- Step-by-Step Guide -->
+    <div class="container text-center step-container">
+        <div class="row justify-content-center">
+            <div class="col-md-3">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>Gather Insights</h4>
+                    <p>Collect user interviews, feedback, or key research findings.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>Name & Paste</h4>
+                    <p>Give your persona a unique name and paste the content below.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <h4>Make Magic ✨</h4>
+                    <p>Click the button & watch AI craft your detailed persona instantly!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container text-center mt-3 mb-3">
+        <h3>🚀 Let's go</h3>
     </div>
 
     <!-- Initial Upload Form -->
     <div class="container mt-4">
         <div class="form-container">
-            <h3>Input User Interview Content</h3>
+            <h3>📜 Input User Interview Content</h3>
             <form id="personaForm">
               <div class="mb-3">
                   <label for="file_name" class="form-label">Upload Name:</label>

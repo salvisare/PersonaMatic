@@ -24,19 +24,33 @@ body {
     color: #c2aaff;
 }
 .btn-primary {
-    background-color: #6200ea;
+    background: linear-gradient(90deg, #6200ea, #3700b3);
     border: none;
+    font-size: 1.2rem;
+    transition: all 0.2s ease-in-out;
 }
+
 .btn-primary:hover {
-    background-color: #3700b3;
+    background: linear-gradient(45deg, #6200ea, #3700b3);
+    transform: translateY(-2px);
 }
+
+/* Form Styling */
 .form-container {
     max-width: 500px;
     margin: auto;
-    background: #1f1f1f;
+    background: #2a2a2a;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 4px;
+    border: 1px solid #444;
 }
+
+.form-label {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #c2aaff;
+}
+
 .usp-section {
     display: flex;
     justify-content: center;
@@ -44,9 +58,10 @@ body {
     margin-top: 40px;
 }
 .usp-box {
-    background-color: #1f1f1f;
+    background: #2a2a2a;
+    border: 1px solid #444;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 4px;
     text-align: center;
     flex: 1;
     max-width: 300px;
@@ -140,6 +155,137 @@ body {
     border-left: 3px solid #6200ea;
     padding-left: 10px;
 }
+
+/* Table Styling */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px; /* Creates space between rows */
+    background: #2a2a2a;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #6200ea;
+    color: #ffffff;
+}
+
+td {
+    background: #2a2a2a;
+    color: #ffffff;
+}
+
+tr {
+    transition: background 0.3s ease;
+}
+
+tr:hover {
+    background: #3b1d63; /* Highlight row on hover */
+}
+
+table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Style for buttons inside table */
+.btn-info, .btn-success {
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-info {
+    background: #03dac6;
+    color: #121212;
+    border: none;
+}
+
+.btn-info:hover {
+    background: #018786;
+    color: #ffffff;
+}
+
+.btn-success {
+    background: #6200ea;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-success:hover {
+    background: #3700b3;
+}
+
+/* Toast-style error message */
+.text-danger {
+    background-color: rgba(255, 0, 0, 0.1); /* Light red background */
+    color: #ff4d4d; /* Bright red text */
+    padding: 10px 15px;
+    border-radius: 4px;
+    border-left: 5px solid #ff4d4d; /* Accent border */
+    font-weight: 400;
+    display: inline-block;
+    width: fit-content;
+    max-width: 90%;
+    margin: 10px 0;
+}
+
+/* Fancy Heading */
+.fancy-heading {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Step-by-Step Guide */
+.step-container {
+    max-width: auto;
+}
+
+.step-box {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    color: #ffffff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #444;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.step-box:hover {
+    transform: translateY(-5px);
+    border-color: #6200ea;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: #6200ea;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
 
 /* Responsive */
 @media (max-width: 992px) {
