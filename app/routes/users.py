@@ -1,8 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session, url_for, current_app
+from werkzeug.security import check_password_hash
 from app.models.users import User
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
+import logging
 
 users_bp = Blueprint('users', __name__)
 
@@ -62,3 +64,21 @@ def delete_user(id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "User deleted successfully"})
+
+
+@users_bp.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    session["user_id"] = user.id  # ✅ Ensure session is set
+    session.modified = True  # ✅ Ensure session is saved
+    print("Session set for user:", session.get("user_id"))  # ✅ Debugging Step
+
+    return jsonify({"message": "Login successful", "redirect_url": url_for("uploads.uploads_list")})

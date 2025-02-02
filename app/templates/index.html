@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Registration - My Flask App</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>PersonaMatic - Automated User Persona Generation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">PersonaMatic</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -17,43 +19,81 @@
               <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
+              <a class="nav-link" href="#features">Features</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Pricing</a>
+              <a class="nav-link" href="#register">Sign Up</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-    <div class="container mt-3"> <h2>Register</h2>
 
-        {% if message %}  <div class="alert alert-danger">{{ message }}</div>
-        {% endif %}
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container">
+            <h1>Welcome to PersonaMatic</h1>
+            <p class="lead">Automate User Persona Generation and Gain Deeper Insights into Your Audience</p>
+            <a href="#register" class="btn btn-primary cta-button">Get Started</a>
+        </div>
+    </header>
 
-        <form method="POST"> <div class="mb-3">
-                <label for="username" class="form-label">Username:</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+    <!-- Features Section -->
+    <div class="container my-5" id="features">
+        <h2 class="text-center">Why Choose PersonaMatic?</h2>
+        <div class="usp-section">
+            <div class="usp-box">
+                <h4>🚀 Instant Persona Creation</h4>
+                <p>Generate highly detailed user personas in seconds using AI-driven data analysis.</p>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+            <div class="usp-box">
+                <h4>📊 Data-Driven Insights</h4>
+                <p>Make strategic decisions based on real-world data and comprehensive audience profiling.</p>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password:</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+            <div class="usp-box">
+                <h4>💡 Easy Integration</h4>
+                <p>Seamlessly integrate PersonaMatic with your existing tools and workflow.</p>
             </div>
-            <div class="mb-3">
-                <label for="first_name" class="form-label">First Name:</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" required>
-            </div>
-            <div class="mb-3">
-                <label for="last_name" class="form-label">Last Name:</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
+        </div>
     </div>
+
+    <!-- Registration Form -->
+    <div class="container mt-5" id="register">
+        <div class="form-container">
+            <h3>Try it out and generate your User Persona now!</h3>
+            {% if message %}
+            <div class="alert alert-danger">{{ message }}</div>
+            {% endif %}
+            <form method="POST" action="{{ url_for('main.home') }}">
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name:</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name:</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2025 PersonaMatic. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>

@@ -1,23 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Blueprint
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Blueprint, flash, session
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
+from app import db
+from .users import User
 from app.routes.users import create_user
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/", methods=["GET", "POST"])
 def home():
-    """Default route for the home page."""
-    """
-    return jsonify({
-        'message': 'Welcome to the PersonaMatic API!',
-        'status': 'success'  # Ensure the status key is included here
-    }), 200  # Status code 200 indicates success
-    """
-    #data = {"message": "Welcome to the PersonaMatic API!", "status": "success"}
-    #return render_template("index.html", data=data)  # Pass data to the template
-
+    """Handles user registration and ensures unique accounts."""
     message = None
+
     if request.method == "POST":
         username = request.form.get("username")
         email = request.form.get("email")
@@ -25,28 +19,45 @@ def home():
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
 
-        # Validation (important!)
-        if not username:
-            message = "Username is required."
-        elif not email:
-            message = "Email is required."
-        elif not password:
-            message = "Password is required."
-        elif len(password) < 8:  # Example of password validation
-            message = "Password must be at least 8 characters."
-        # Add more validation as needed (e.g., email format)
+        # ✅ Validate input fields
+        if not all([username, email, password, first_name, last_name]):
+            message = "All fields are required."
+        elif len(password) < 8:
+            message = "Password must be at least 8 characters long."
         else:
-            response = create_user(username, email, password, first_name, last_name)  # Call create_user
-            if response[1] == 201:  # Check status code
-                return redirect(url_for('success', username=username))
+            # ✅ Check if email or username is already registered
+            existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
+            if existing_user:
+                message = "A user with this email or username already exists. Please log in."
             else:
-                message = response[0].get_json().get('message')  # Get error message from JSON
+                try:
+                    # ✅ Create new user with hashed password
+                    new_user = User(
+                        username=username,
+                        email=email,
+                        password=generate_password_hash(password),  # Hash password
+                        first_name=first_name,
+                        last_name=last_name
+                    )
+                    db.session.add(new_user)
+                    db.session.commit()
+
+                    # ✅ Store the user ID in session (Ensure correct ID field is used)
+                    session["user_id"] = new_user.id  # Use `id`, NOT `user_id`
+
+                    flash("Registration successful!", "success")
+                    return redirect(url_for('main.success', username=username))
+
+                except IntegrityError:
+                    db.session.rollback()
+                    message = "An error occurred. Please try again."
 
     return render_template("index.html", message=message)
 
 
-@main_bp.route("/success/<username>")
-def success(username):
+@main_bp.route("/success")
+def success():
+    username = request.args.get('username', 'Guest')  # Default to 'Guest' if missing
     return render_template("success.html", username=username)
 
 

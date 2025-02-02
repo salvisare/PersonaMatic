@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.models.personas import PersonasBaseData, PersonaGoals, PersonaMotivations, PersonaFrustrations
 from app.models.user_uploaded_data import UserUploadedData
 from app import db
@@ -101,3 +101,37 @@ def delete_persona(id):
         return jsonify({'message': 'Persona deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+@personas_bp.route('/persona/<int:persona_id>', methods=['GET'])
+def view_persona(persona_id):
+    """Retrieve the persona details and render the persona page"""
+    persona = PersonasBaseData.query.get_or_404(persona_id)
+
+    persona_data = {
+        "id": persona.id,
+        "photo": persona.photo,
+        "name": persona.name,
+        "additional_title": persona.additional_title,
+        "description": persona.description,
+        "age": persona.age,
+        "gender": persona.gender,
+        "occupation": persona.occupation,
+        "quote_summarized": persona.quote_summarized,
+        "created_at": persona.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": persona.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "goals": [persona.goals[0].goal_01, persona.goals[0].goal_02, persona.goals[0].goal_03] if persona.goals else [],
+        "motivations": [persona.motivations[0].motivation_01, persona.motivations[0].motivation_02, persona.motivations[0].motivation_03] if persona.motivations else [],
+        "frustrations": [persona.frustrations[0].frustration_01, persona.frustrations[0].frustration_02, persona.frustrations[0].frustration_03] if persona.frustrations else [],
+        "activities": [persona.activities[0].activity_01, persona.activities[0].activity_02, persona.activities[0].activity_03, persona.activities[0].activity_04, persona.activities[0].activity_05] if persona.activities else [],
+        "digital_use": {
+            "desktop_use": persona.digital_use[0].desktop_use if persona.digital_use else "Not known",
+            "mobile_use": persona.digital_use[0].mobile_use if persona.digital_use else "Not known",
+            "social_media_use": persona.digital_use[0].social_media_use if persona.digital_use else "Not known",
+            "computer_literacy": persona.digital_use[0].computer_literacy if persona.digital_use else "Not known",
+            "frequently_used_tools_and_apps": persona.digital_use[0].frequently_used_tools_and_apps if persona.digital_use else "Not known"
+        },
+        "persona_quotes": [persona.persona_quotes[0].quote_01, persona.persona_quotes[0].quote_02, persona.persona_quotes[0].quote_03] if persona.persona_quotes else []
+    }
+
+    return render_template("persona.html", persona=persona_data)

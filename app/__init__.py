@@ -1,31 +1,34 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
-import os
 
-# Initialize extensions globally
+# ✅ Load environment variables
+load_dotenv()
+
+# ✅ Initialize extensions globally
 db = SQLAlchemy()
 migrate = Migrate()
 
-load_dotenv()
-
-# Retrieve the API key
+# ✅ Retrieve API Key and Secret Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret_key")
+
 
 def create_app(config_class='config.DevelopmentConfig'):
-    """Application factory function."""
+    """Flask application factory function."""
     app = Flask(__name__)
-    basedir = os.path.abspath(os.path.dirname(__file__))
 
-    # Load configuration
+    # ✅ Load configuration
     app.config.from_object(config_class)
+    app.config["SECRET_KEY"] = SECRET_KEY  # Load SECRET_KEY securely
 
-    # Initialize extensions
+    # ✅ Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Register blueprints
+    # ✅ Register Blueprints (Routes)
     from app.routes.main import main_bp
     from app.routes.users import users_bp
     from app.routes.personas import personas_bp
@@ -36,12 +39,12 @@ def create_app(config_class='config.DevelopmentConfig'):
     app.register_blueprint(personas_bp, url_prefix='/api/')
     app.register_blueprint(uploads_bp, url_prefix='/api/')
 
-    # Print all registered routes
+    # ✅ Debugging: Print all registered routes
     print("Registered Routes:")
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint} -> {rule.rule}")
 
-    # Default error handlers
+    # ✅ Default error handlers
     @app.errorhandler(404)
     def not_found_error(error):
         return {"error": "Resource not found"}, 404

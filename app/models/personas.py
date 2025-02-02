@@ -110,7 +110,7 @@ class PersonaDigitalUse(db.Model):
     mobile_use = db.Column(db.Text, nullable=False, default="Not known")
     social_media_use = db.Column(db.Text, nullable=False, default="Not known")
     computer_literacy = db.Column(db.Text, nullable=False, default="Not known")
-    frequently_used_tools_and_apps = db.Column(db.Text, nullable="Not known")
+    frequently_used_tools_and_apps = db.Column(db.Text, nullable=False, default="Not known")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

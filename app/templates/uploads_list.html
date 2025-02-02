@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Uploaded Personas - PersonaMatic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">PersonaMatic</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Uploads Management</h2>
+        <p><strong>Uploaded Content:</strong> <span id="uploadCount">0</span>/3</p>
+        <table class="table table-dark" id="uploadsTable">
+            <thead>
+                <tr>
+                    <th>Upload</th>
+                    <th>Content</th>
+                    <th>Uploaded At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div id="uploadFormContainer"></div>
+    </div>
+
+    <script>
+        function loadUploads() {
+            console.log("🔄 Fetching uploads from API...");
+
+            fetch("/api/uploads-retrieve")  // ✅ Ensure the correct API URL is used
+            .then(response => response.json())
+            .then(data => {
+                console.log("📌 API Response Data:", data);  // ✅ Debug fetched API data
+
+                const userId = "{{ user_id }}";  // ✅ Get user ID from session
+                console.log("🔍 Session User ID:", userId);  // ✅ Debug session ID
+
+                // ✅ Filter uploads to only show those for the logged-in user
+                const userUploads = data.filter(upload => upload.user_id == userId);
+                console.log("✅ Filtered User Uploads:", userUploads);  // ✅ Debug filtered uploads
+
+                // ✅ Display number of uploads
+                document.getElementById("uploadCount").innerText = userUploads.length;
+
+                const tableBody = document.getElementById("uploadsTable").getElementsByTagName("tbody")[0];
+                tableBody.innerHTML = "";
+
+                // ✅ Populate table with user uploads
+                userUploads.slice(0, 3).forEach(upload => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${upload.file_name || "Unnamed File"}</td>
+                        <td>${upload.content.substring(0, 100)}...</td>
+                        <td>${new Date(upload.uploaded_at).toLocaleString()}</td>
+                        <td>
+                            ${upload.processed
+                                ? `<a href="/api/persona/${upload.persona_id}" class="btn btn-info">View Persona</a>`
+                                : `<button class="btn btn-success" onclick="generatePersona(${upload.id})">Generate Persona</button>`}
+                        </td>
+                    `;
+                });
+
+                const uploadFormContainer = document.getElementById("uploadFormContainer");
+                if (userUploads.length >= 3) {
+                    uploadFormContainer.innerHTML = `<p class="text-danger">You have reached the maximum of 3 uploads. Purchase more credits to add additional personas.</p>`;
+                } else {
+                    uploadFormContainer.innerHTML = `
+                        <div class="form-container mt-4">
+                            <h3>Upload Another Persona</h3>
+                            <form id="personaForm">
+                                <div class="mb-3">
+                                    <label for="file_name" class="form-label">Upload Name:</label>
+                                    <input type="text" class="form-control" id="file_name" name="file_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="user_interview" class="form-label">Enter interview details:</label>
+                                    <textarea class="form-control" id="user_interview" name="user_interview" rows="8" required></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="submitPersona()">Upload Persona</button>
+                            </form>
+                        </div>`;
+                }
+            })
+            .catch(error => console.error("❌ Error fetching uploads:", error));  // ✅ Debug API call errors
+        }
+
+        function submitPersona() {
+            const fileName = document.getElementById("file_name").value;
+            let userInterview = document.getElementById("user_interview").value;
+            userInterview = userInterview.trim().replace(/\r?\n/g, "\\n");
+
+            const requestData = {
+                file_name: fileName,
+                content: userInterview
+            };
+
+            console.log("📤 Sending Persona Upload Request:", requestData);
+
+            fetch("/api/uploads", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("📬 Upload Response:", data);
+
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    alert("Persona Uploaded Successfully!");
+                    loadUploads();
+                }
+            })
+            .catch(error => console.error("❌ Error uploading persona:", error));
+        }
+
+        function generatePersona(uploadId) {
+            console.log("⚙️ Processing Persona for Upload ID:", uploadId);
+
+            fetch("/api/process-content", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({ id: uploadId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("📬 Persona Processing Response:", data);
+
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    alert("Persona Generated Successfully!");
+
+                    // ✅ Ensure redirection works
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else if (data.persona_id) {
+                        window.location.href = "/api/persona/" + data.persona_id;
+                    } else {
+                        console.error("❌ Error: Persona ID missing from response");
+                    }
+                }
+            })
+            .catch(error => console.error("❌ Error processing persona:", error));
+        }
+
+        // ✅ Ensure script runs only after the DOM loads
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("🚀 Page Loaded. Fetching Uploads...");
+            loadUploads();
+        });
+    </script>
+</body>
+</html>

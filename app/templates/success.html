@@ -1,39 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Registration Successful!</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>Success - PersonaMatic - Automated User Persona Generation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand" href="#">PersonaMatic</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="#navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Pricing</a>
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-    <div class="container mt-3">
-        <h1>Registration Successful!</h1>
-        {% if username %}
-            <p>Welcome, {{ username }}!</p>
-        {% else %}
-            <p>Welcome!</p>  {% endif %}
-        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Registration</a>
+
+    <!-- Success Message -->
+    <div class="container text-center mt-5">
+        <h2>Registration Successful!</h2>
+        <p class="lead">Thank you for signing up. Start generating your first user persona below.</p>
     </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- Initial Upload Form -->
+    <div class="container mt-4">
+        <div class="form-container">
+            <h3>Input User Interview Content</h3>
+            <form id="personaForm">
+              <div class="mb-3">
+                  <label for="file_name" class="form-label">Upload Name:</label>
+                  <input type="text" class="form-control" id="file_name" name="file_name" required>
+              </div>
+              <div class="mb-3">
+                  <label for="user_interview" class="form-label">Enter interview details:</label>
+                  <textarea class="form-control" id="user_interview" name="user_interview" rows="8" required></textarea>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="submitPersona()">Generate Persona</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2025 PersonaMatic. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-T3c6o7NLe3Fw5A5p6wFf9zP6z5p6Pv9U8z5A5XyL" crossorigin="anonymous"></script>
+    <script>
+        function submitPersona() {
+            const fileName = document.getElementById("file_name").value;
+            let userInterview = document.getElementById("user_interview").value;
+            userInterview = userInterview.trim().replace(/\r?\n/g, "\\n");
+
+            // ✅ Get user_id from a hidden field or session variable
+            const userId = "{{ session.get('user_id', '') }}";
+
+            if (!userId) {
+                alert("User ID is missing. Please log in again.");
+                return;
+            }
+
+            const requestData = {
+                user_id: userId,  // ✅ Ensure correct user ID is sent
+                file_name: fileName,
+                content: userInterview
+            };
+
+            console.log("Sending JSON Data:", requestData);
+
+            fetch("{{ url_for('uploads.upload_file') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received Response:", data);
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    window.location.href = "{{ url_for('uploads.uploads_list') }}"; // ✅ Redirect correctly
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
 </body>
 </html>
