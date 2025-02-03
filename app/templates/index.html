@@ -4,10 +4,11 @@
     <title>PersonaMatic - Automated User Persona Generation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary bg-grey">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">PersonaMatic</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +44,7 @@
         <h2 class="text-center">Why Choose PersonaMatic?</h2>
         <div class="usp-section">
             <div class="usp-box">
-                <h4>🚀 Instant Persona Creation</h4>
+                <h4>🚀 Instant User Persona</h4>
                 <p>Generate highly detailed user personas in seconds using AI-driven data analysis.</p>
             </div>
             <div class="usp-box">
@@ -60,38 +61,84 @@
     <!-- Registration Form -->
     <div class="container mt-5" id="register">
         <div class="form-container">
-            <h3>Try it out and generate your User Persona now!</h3>
+            <h3 class="text-center mt-2">🚀 Try it out now!</h3>
+
+            <!-- Snackbar-style limited offer -->
+            <div class="snackbar">
+                <i class="fas fa-gift"></i> Limited offer: Generate <b>3 User Personas for FREE!</b>
+            </div>
+
             {% if message %}
             <div class="alert alert-danger">{{ message }}</div>
             {% endif %}
+
             <form method="POST" action="{{ url_for('main.home') }}">
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">First Name:</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                <!-- First Name & Last Name in One Row -->
+                <div class="row mb-3 mt-3">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label">First Name:</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="John" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label">Last Name:</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Doe" required>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Last Name:</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" required>
-                </div>
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Email:</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
                 </div>
+
                 <div class="mb-3">
                     <label for="password" class="form-label">Password:</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Choose a strong password" required>
                 </div>
+
                 <div class="mb-3">
                     <label for="username" class="form-label">Username:</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Pick a unique username" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Register</button>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
             </form>
         </div>
     </div>
 
+    <!-- Testimonials Section -->
+    <div class="container mt-5">
+        <h3 class="text-center mb-4">What Experts Are Saying</h3>
+
+        <div class="testimonials-container">
+            <!-- Testimonial 1 -->
+            <div class="testimonial-box">
+                <div class="testimonial-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <p class="testimonial-text">
+                    "PersonaMatic has revolutionized how we build user personas. In just seconds, we get high-quality, structured insights that would normally take hours conceptualizing."
+                </p>
+                <p class="testimonial-author"><strong>Emily Richardson</strong> – UX Researcher, DesignDrop</p>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="testimonial-box">
+                <div class="testimonial-avatar">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <p class="testimonial-text">
+                    "As a Business Analyst, PersonaMatic helps me quickly create detailed user personas, saving us hours in alignment sessions. The quality is incredible!"
+                </p>
+                <p class="testimonial-author"><strong>Michael Trumann</strong> – Senior Business Analyst, Inter Agile</p>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-5">
+    <footer class="bg-dark text-white text-center py-3 mt-5 footer">
         <p>&copy; 2025 PersonaMatic. All Rights Reserved.</p>
     </footer>
 
