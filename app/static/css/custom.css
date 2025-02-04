@@ -50,12 +50,11 @@ body {
     font-weight: 400;
 }
 .form-control {
-    color: #ffffff;
     border-radius: 4px;
 }
 
 .form-control::placeholder {
-    color: #bbb;
+    color: #aaa;
 }
 
 /* Snackbar-style Limited Offer */

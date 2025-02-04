@@ -1,4 +1,6 @@
-# PersonaMatic: User Persona generator with Flask, OpenAI and Bootstrap integration
+# PersonaMatic: User Persona generator
+
+PersonaMatic is an AI-powered tool that automates user persona generation based on user interview content. Save time and enhance UX research with detailed and structured personas.
 
 A Flask-based web application integrating the OpenAI API for content processing and a responsive front-end powered by Bootstrap. This project serves as a starter template for building AI-powered web apps with a clean and responsive UI.
 
@@ -20,36 +22,58 @@ Ensure you have the following installed:
 
 ---
 
-## Installation
+## 🚀 Installation Guide
 
-1. **Clone the Repository**
+### 1️⃣ Clone the Repository
 
-   ```bash
-   git clone git@github.com:salvisare/PersonaMatic.git
+```bash
+git clone git@github.com:salvisare/PersonaMatic.git
+cd PersonaMatic
+```
 
-2. **Set Up a Virtual Environment**
+### 2️⃣ Set Up a Virtual Environment
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-3. **Install Dependencies**
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-   ```bash
-   pip install -r requirements.txt
+### 3️⃣ Install Dependencies
 
-4. **Add OpenAI API Key**
+```bash
+pip install -r requirements.txt
+```
 
-   ```bash
-   OPENAI_API_KEY=your_openai_api_key
+### 4️⃣ Configure API & Session Key
 
-5. **Run the Application**
+Create a `.env` file in the root directory and add:
 
-   ```bash
-   flask run
+```bash
+OPENAI_API_KEY=your_openai_api_key
+SESSION_SECRET_KEY=your_secure_random_key
+```
 
-6. **View in Browser**
-   Open http://127.0.0.1:5000 in your web browser.
+#### 🔑 Generate a secure session key using:
+```python
+import secrets
+print(secrets.token_hex(32))
+```
+
+### 5️⃣ Run the Application
+
+```bash
+flask run
+```
+
+### 6️⃣ View in Browser
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your web browser.
+
+---
+
+### ✅ Notes:
+- Ensure that your `.env` file is properly configured before running the application.
+- If you face permission issues on Windows, use `Set-ExecutionPolicy Unrestricted -Scope Process` before activating the virtual environment.
+- Use `deactivate` to exit the virtual environment when done.
 
 ---
 
@@ -64,7 +88,14 @@ Ensure you have the following installed:
 ---
 
 ## Screenshots
-* tbc
+Home screen:
+![PersonaMatic Screenshot 01](app/static/img/PersonaMatic_01.png)
+Initial upload screen:
+![PersonaMatic Screenshot 02](app/static/img/PersonaMatic_02.png)
+Uploads management screen:
+![PersonaMatic Screenshot 03](app/static/img/PersonaMatic_03.png)
+Generatet Persona screen:
+![PersonaMatic Screenshot 04](app/static/img/PersonaMatic_04.png)
 
 ---
 
