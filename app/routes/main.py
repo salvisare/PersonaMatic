@@ -19,19 +19,19 @@ def home():
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
 
-        # ✅ Validate input fields
+        # Validate input fields
         if not all([username, email, password, first_name, last_name]):
             message = "All fields are required."
         elif len(password) < 8:
             message = "Password must be at least 8 characters long."
         else:
-            # ✅ Check if email or username is already registered
+            # Check if email or username is already registered
             existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
             if existing_user:
                 message = "A user with this email or username already exists. Please log in."
             else:
                 try:
-                    # ✅ Create new user with hashed password
+                    # Create new user with hashed password
                     new_user = User(
                         username=username,
                         email=email,
@@ -42,7 +42,7 @@ def home():
                     db.session.add(new_user)
                     db.session.commit()
 
-                    # ✅ Store the user ID in session (Ensure correct ID field is used)
+                    # Store the user ID in session (Ensure correct ID field is used)
                     session["user_id"] = new_user.id  # Use `id`, NOT `user_id`
 
                     flash("Registration successful!", "success")

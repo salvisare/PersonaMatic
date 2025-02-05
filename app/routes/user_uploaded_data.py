@@ -24,12 +24,12 @@ def upload_file():
     if not user_id:
         return jsonify({"error": "User not logged in"}), 403  # Prevents uploads without a logged-in user
 
-    # ✅ Check the upload count for the current user
+    # Check the upload count for the current user
     existing_uploads = UserUploadedData.query.filter_by(user_id=user_id).count()
     if existing_uploads >= 3:
         return jsonify({"error": "You have reached the limit of 3 uploads"}), 403
 
-    # ✅ Save the uploaded persona content
+    # Save the uploaded persona content
     try:
         file_name = data.get("file_name")
         if not file_name:
@@ -57,11 +57,11 @@ def upload_file():
 
 @uploads_bp.route('/uploads-retrieve', methods=['GET'])
 def retrieve_uploads():
-    user_id = session.get("user_id")  # ✅ Get user ID from session
+    user_id = session.get("user_id")  # Get user ID from session
     if not user_id:
         return jsonify({"error": "User not logged in"}), 403  # Prevent unauthorized access
 
-    uploads = UserUploadedData.query.filter_by(user_id=user_id).all()  # ✅ Fetch only logged-in user's uploads
+    uploads = UserUploadedData.query.filter_by(user_id=user_id).all()  # Fetch only logged-in user's uploads
     logging.info(f"Retrieved {len(uploads)} uploads for user {user_id}")
 
     results = [
@@ -95,13 +95,13 @@ def retrieve_upload(id):
 @uploads_bp.route("/uploads-list", methods=["GET"])
 def uploads_list():
     user_id = session.get("user_id")
-    print("Session User ID:", user_id)  # ✅ Debugging Step
+    print("Session User ID:", user_id)  # Debugging Step
 
     if not user_id:
         return jsonify({"error": "User not logged in"}), 403
 
     uploads = UserUploadedData.query.filter_by(user_id=user_id).all()
-    print("Retrieved Uploads for User:", len(uploads))  # ✅ Debugging Step
+    print("Retrieved Uploads for User:", len(uploads))  # Debugging Step
 
     return render_template("uploads_list.html", uploads=uploads, user_id=user_id)
 
@@ -233,13 +233,13 @@ def process_content():
         db.session.add(persona)
         db.session.commit()
 
-        # ✅ Link persona to uploaded data
+        # Link persona to uploaded data
         record.persona_id = persona.id
         record.processed = True
         db.session.commit()
-        logging.info(f"Persona ID {persona.id} linked to Upload ID {record.id}")  # ✅ Log persona linking
+        logging.info(f"Persona ID {persona.id} linked to Upload ID {record.id}")  # Log persona linking
 
-        # ✅ Save associated tables
+        # Save associated tables
         db.session.add(PersonaDigitalUse(
             persona_id=persona.id,
             desktop_use=desktop_use,
